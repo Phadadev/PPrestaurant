@@ -1,10 +1,14 @@
 package com.pw.paphat.pprestaurant;
 
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.View;
+import android.widget.EditText;
+import android.widget.Toast;
 
 import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Request;
@@ -17,12 +21,17 @@ public class MainActivity extends AppCompatActivity {
 
     //Explicit
     private MyManage myManage;
+    private EditText userEditText, passwordEditText;
+    private String userString, passwordString;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        //Bind Widget
+        bindWidget();
 
         //Requrest SQLite (want to use database)
         myManage = new MyManage(this);
@@ -38,6 +47,78 @@ public class MainActivity extends AppCompatActivity {
 
 
     }   //Main Method
+
+    private void bindWidget() {
+        userEditText = (EditText) findViewById(R.id.userEditText);
+        passwordEditText = (EditText) findViewById(R.id.passwordEditText);
+    }
+
+    public void clickLogin1(View view) {//use view make see in xml
+
+        Log.d("Test", "Click");
+
+        userString = userEditText.getText().toString().trim();//trim mean deleate blank
+        passwordString = passwordEditText.getText().toString().trim();
+
+        //Check Space
+        if (userString.equals("") || passwordString.equals("")) {//if string must use equals
+
+            //Have Space
+            MyAlert myAlert = new MyAlert();
+            myAlert.myDialog(this, "มีช่องว่าง",
+                    "กรุณากรอกทุกช่อง ค่ะ");//OOP have in C and java
+
+
+        } else {
+
+            //No Space
+
+            checkUser();
+
+        }
+
+    }   //clickLogin
+
+    private void checkUser() {
+
+        try {//check data in database
+
+            SQLiteDatabase sqLiteDatabase = openOrCreateDatabase(MyOpenHelper.database_name,
+                    MODE_PRIVATE, null);//null mean not sequrity , not press user&password
+            Cursor cursor = sqLiteDatabase.rawQuery("SELECT * FROM userTABLE WHERE User = "+ "'"+userString +"'",null);//rawQuery can use any,userTABLE mean us name table
+            cursor.moveToFirst();
+
+            String[] resultStrings = new String[cursor.getColumnCount()];//cursor.getColumnCount() will count number of column,Reservations memory
+            for (int i=0;i<cursor.getColumnCount();i++) {
+
+                resultStrings[i] = cursor.getString(i);
+
+            }   //for
+            cursor.close();//return memmory ,especially!!!
+
+            //Check Password
+            if (passwordString.equals(resultStrings[2])) {
+                //Password True
+                Toast.makeText(this, "ยินดีต้อนรับ "+resultStrings[3], Toast.LENGTH_LONG).show();
+
+
+
+            } else {
+                //Passwrod False
+                MyAlert myAlert = new MyAlert();
+                myAlert.myDialog(this,"Password ผิด","Passwordผิด กรุณากรอกใหม่");
+
+
+            }
+
+        } catch (Exception e) {
+
+            MyAlert myAlert = new MyAlert();
+            myAlert.myDialog(this, "ไม่มี User นี้",
+                    "ไม่มี " + userString + " ในฐานขอ้มูลของเรา");
+
+        }
+    }   //checkUser
 
     private void synJSONtoSQLite() {
 
@@ -74,10 +155,10 @@ public class MainActivity extends AppCompatActivity {
 
             Log.d("PP_Restaurant", "strJSON ==>" + strJSON);
 
-            try{
+            try {
 
                 JSONArray jsonArray = new JSONArray(strJSON);
-                for (int i=0;i<jsonArray.length();i++){
+                for (int i = 0; i < jsonArray.length(); i++) {
 
                     JSONObject jsonObject = jsonArray.getJSONObject(i);
 
@@ -90,11 +171,9 @@ public class MainActivity extends AppCompatActivity {
                 }// for
 
 
-
-            }catch (Exception e){
+            } catch (Exception e) {
                 Log.d("PP_Restaurant", "Error ==>" + e.toString());
             }
-
 
 
         } // onPost
