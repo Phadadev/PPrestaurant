@@ -1,5 +1,6 @@
 package com.pw.paphat.pprestaurant;
 
+import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
@@ -85,11 +86,11 @@ public class MainActivity extends AppCompatActivity {
 
             SQLiteDatabase sqLiteDatabase = openOrCreateDatabase(MyOpenHelper.database_name,
                     MODE_PRIVATE, null);//null mean not sequrity , not press user&password
-            Cursor cursor = sqLiteDatabase.rawQuery("SELECT * FROM userTABLE WHERE User = "+ "'"+userString +"'",null);//rawQuery can use any,userTABLE mean us name table
+            Cursor cursor = sqLiteDatabase.rawQuery("SELECT * FROM userTABLE WHERE User = " + "'" + userString + "'", null);//rawQuery can use any,userTABLE mean us name table
             cursor.moveToFirst();
 
             String[] resultStrings = new String[cursor.getColumnCount()];//cursor.getColumnCount() will count number of column,Reservations memory
-            for (int i=0;i<cursor.getColumnCount();i++) {
+            for (int i = 0; i < cursor.getColumnCount(); i++) {
 
                 resultStrings[i] = cursor.getString(i);
 
@@ -99,14 +100,17 @@ public class MainActivity extends AppCompatActivity {
             //Check Password
             if (passwordString.equals(resultStrings[2])) {
                 //Password True
-                Toast.makeText(this, "ยินดีต้อนรับ "+resultStrings[3], Toast.LENGTH_LONG).show();
-
-
+                Toast.makeText(this, "ยินดีต้อนรับ " + resultStrings[3]
+                        , Toast.LENGTH_LONG).show();
+                Intent intent = new Intent(MainActivity.this, ServiceActivity.class);//make instant
+                intent.putExtra("Officer", resultStrings[3]);
+                startActivity(intent);
+                finish();//destroy this page
 
             } else {
                 //Passwrod False
                 MyAlert myAlert = new MyAlert();
-                myAlert.myDialog(this,"Password ผิด","Passwordผิด กรุณากรอกใหม่");
+                myAlert.myDialog(this, "Password ผิด", "Passwordผิด กรุณากรอกใหม่");
 
 
             }

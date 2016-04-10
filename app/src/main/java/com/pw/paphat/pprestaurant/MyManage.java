@@ -21,7 +21,7 @@ public class MyManage {
 
     public static final String food_table = "foodTABLE";
     public static final String column_food = "Food";
-    public static final String column_price = "Price ";
+    public static final String column_price = "Price";
     public static final String column_source = "Source";//must not explicit id again because use together above table
 
     public MyManage(Context context) {
